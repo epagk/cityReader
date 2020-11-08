@@ -1,0 +1,8 @@
+<node id="50557059" visible="true" version="19" changeset="2960276" timestamp="2009-10-26T20:57:02Z" user="beanmap" uid="55467" lat="35.5133873" lon="23.9602593"/>
+ <node id="50557060" visible="true" version="20" changeset="59275390" timestamp="2018-05-25T16:05:05Z" user="Giorgos Russos" uid="5894643" lat="35.5134817" lon="23.9586104"/>
+ <node id="50557061" visible="true" version="21" changeset="59275390" timestamp="2018-05-25T16:05:05Z" user="Giorgos Russos" uid="5894643" lat="35.5139415" lon="23.9567319"/>
+ <node id="50557062" visible="true" version="19" changeset="2960276" timestamp="2009-10-26T20:57:04Z" user="beanmap" uid="55467" lat="35.5137157" lon="23.9565943"/>
+ <way id="5738798" visible="true" version="30" changeset="69326934" timestamp="2019-04-18T00:45:23Z" user="nikospag" uid="609559">
+ <node id="50557063" visible="true" version="20" changeset="32682686" timestamp="2015-07-16T19:30:08Z" user="waldviertlerkartograph" uid="915498" lat="35.5128099" lon="23.9554196"/>
+ <node id="50557065" visible="true" version="20" changeset="17869279" timestamp="2013-09-16T14:35:32Z" user="Polarbear" uid="114161" lat="35.5127781" lon="23.9545367"/>
+ <tag k="highway" v="traffic_signals"/>
