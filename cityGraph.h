@@ -5,15 +5,15 @@
 
 using namespace std;
 
-extern vector<Node> nodes;
+extern vector<Node*> nodes;
 
-Node* getNode(vector<Node> &v, string ID)
+Node* getNode(vector<Node*> &v, string ID)
 {	
 	Node* it;
 
 	for (unsigned n = 0; n < v.size(); n++)
 	{	
-		it = &(v.at(n));
+		it = v.at(n);
 		if (it->getID().compare(ID) == 0){
 			return it;
 		}
@@ -41,25 +41,22 @@ bool inList(vector<string> &listIDs, string id)
 // If a connection appears more than once, we want to
 // remove the extra appearances. Also we remove nodes which
 // have no connections at all
-void remove_duplicates(vector<Node> &v)
+void remove_duplicates(vector<Node*> &v)
 {
 	Node* it;
-	vector<int> noConnections;
 
 	for (unsigned n = 0; n < v.size(); n++)
 	{
 		vector<int> indexes;
 		vector<string> listIDs;
 
-		it = &(v.at(n));
+		it = v.at(n);
 		vector<Node*>* conn = it->getConnections();
 
 		// Keep indexes of nodes without connections to delete
 		// them later. Once they are not part of the road
-		if (conn->empty()){
-			noConnections.insert(noConnections.begin(), n);
+		if (conn->empty())
 			continue;
-		}
 
 		for (int i = 0; i < conn->size()-1; ++i)
 		{
@@ -83,4 +80,12 @@ void remove_duplicates(vector<Node> &v)
 		for (int i = 0; i < indexes.size(); ++i)
 			conn->erase (conn->begin()+indexes.at(i));
 	}
+
+	for (int i = nodes.size()-1; i > -1; --i)
+	{
+		Node* n = nodes.at(i);
+		if((*n).getConnections()->empty())
+			nodes.erase(nodes.begin()+i);
+	}
+
 }
