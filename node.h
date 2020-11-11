@@ -61,9 +61,19 @@ class Node
 		        connections.push_back(a);
 		    }
 
-		    vector<Node*> getConnections()
+		    void remove_connection(string conn)
 		    {
-		        return connections;
+		    	for (int i = 0; i < connections.size(); ++i)
+		    	{
+		    		Node* c = connections.at(i);
+		    		if ( c->getID().compare(conn) == 0 )
+		    			connections.erase (connections.begin()+i);
+		    	}
+		    }
+
+		    vector<Node*>* getConnections()
+		    {
+		        return &connections;
 		    }	
 			
 			void displayNode();

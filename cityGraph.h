@@ -39,10 +39,12 @@ bool inList(vector<string> &listIDs, string id)
 }
 
 // If a connection appears more than once, we want to
-// remove the extra appearances
+// remove the extra appearances. Also we remove nodes which
+// have no connections at all
 void remove_duplicates(vector<Node> &v)
 {
 	Node* it;
+	vector<int> noConnections;
 
 	for (unsigned n = 0; n < v.size(); n++)
 	{
@@ -50,18 +52,25 @@ void remove_duplicates(vector<Node> &v)
 		vector<string> listIDs;
 
 		it = &(v.at(n));
-		vector<Node*> conn = it->getConnections();
+		vector<Node*>* conn = it->getConnections();
 
-		for (int i = 0; i < conn.size()-1; ++i)
+		// Keep indexes of nodes without connections to delete
+		// them later. Once they are not part of the road
+		if (conn->empty()){
+			noConnections.insert(noConnections.begin(), n);
+			continue;
+		}
+
+		for (int i = 0; i < conn->size()-1; ++i)
 		{
-			Node* c = conn.at(i);
+			Node* c = conn->at(i);
 
 			if ( count(listIDs.begin(), listIDs.end(), (*c).getID()) )	// Already checked that ID
 				continue;	
 
-			for (int j = i+1; j < conn.size(); ++j)
+			for (int j = i+1; j < conn->size(); ++j)
 			{
-				Node* d = conn.at(j);
+				Node* d = conn->at(j);
 				if ( (*c).getID().compare((*d).getID()) == 0 )
 					indexes.push_back(j);
 			}
@@ -72,6 +81,6 @@ void remove_duplicates(vector<Node> &v)
 		sort(indexes.begin(), indexes.end(), greater<int>()); // Sort indexes in descending order
 
 		for (int i = 0; i < indexes.size(); ++i)
-			conn.erase (conn.begin()+indexes.at(i));
+			conn->erase (conn->begin()+indexes.at(i));
 	}
 }

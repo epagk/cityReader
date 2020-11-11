@@ -15,12 +15,19 @@ void Node::displayNode()
     printf("\tLatitude: %.7lf \n",lat);
     printf("\tLongitude: %.7lf \n",lon);
     printf("\tConnections:\n");
-    for (int i = 0; i < connections.size(); ++i)
+    if (connections.size() == 0)
     {
-    	Node* n = connections.at(i);
-    	cout << n->getID() << " ";
+    	cout << "No Connections!" << endl;
     }
-    cout << endl;
+    else
+    {
+    	for (int i = 0; i < connections.size(); ++i)
+	    {
+	    	Node* n = connections.at(i);
+	    	cout << n->getID() << " ";
+	    }
+	    cout << endl;
+    }
 }
 
 // Replace spaces in a string with underscores
@@ -96,7 +103,7 @@ void find_connections(string filename)
 		}
 	}
 
-	// remove_duplicates(nodes);
+	remove_duplicates(nodes);
 }
 
 // read the .osm file extracted from OpenStreetMap
@@ -199,6 +206,7 @@ int main()
 
 	for (int i = 0; i < nodes.size(); ++i)
 	{
+		cout << i << ")" << endl;
 		Node n = nodes.at(i);
 		n.displayNode();
 	}
