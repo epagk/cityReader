@@ -116,15 +116,16 @@ void find_connections(string filename)
 	string str;
 	string prevID = "0";
 	Node* prevNode = getNode(nodes, prevID);
+	vector<Node*> road;
+	size_t a, b;
 
 	while (getline(file, str))
 	{
 		vector<string> line = removeDupWord(str);
 
-		if (line.at(0).compare("<tag") == 0)
-			continue;
-
-		if (line.at(0).compare("<way") == 0){
+		if (line.at(0).compare("<way") == 0)
+		{
+			road.clear();
 			prevID = "0";
 			prevNode = getNode(nodes, prevID);
 		}
@@ -132,23 +133,43 @@ void find_connections(string filename)
 		if (line.at(0).compare("<nd") == 0)
 		{
 			// Get node's id
-			size_t a = line.at(1).find("=");
-		    size_t b = line.at(1).find("/");
+			a = line.at(1).find("=");
+		    b = line.at(1).find("/");
 		    string id = line.at(1).substr (a+1, (b - a)-1 );
 		    id.erase(id.begin()); id.erase(id.end()-1);
 
-		    if (prevID.compare("0") != 0)
-	    	{
-	    		Node* a = getNode(nodes,id);
-	    		a->addConnection(prevNode);
-	    		prevNode->addConnection(a);	
-	    	}
+		    Node* a = getNode(nodes,id);
+		    road.push_back(a);
+		}
 
-	    	prevID = id;
-	    	prevNode = getNode(nodes, prevID);
+		if (line.at(0).compare("<tag") == 0)
+		{
+			if (road.empty())
+				continue;
+
+			a = line.at(2).find("=");
+		    b = line.at(2).find("/");
+		    string tag = line.at(2).substr (a+1, (b - a)-1 );
+
+		    if ( tag.compare("\"ferry\"") == 0 )
+		    	road.clear();
+		}
+
+		if (line.at(0).compare("</way>") == 0)
+		{
+			if ( road.empty() )
+				continue;
+			
+			Node* n1 = road.at(0);
+	    	for (int i = 1; i < road.size(); ++i)
+	    	{
+	    		Node* n2 = road.at(i);
+	    		n1->addConnection(n2);
+    			n2->addConnection(n1);
+    			n1 = road.at(i);
+	    	}
 		}
 	}
-
 	remove_duplicates(nodes);
 }
 
@@ -166,84 +187,133 @@ void parse_data(string filename)
 	{
 		// If a line starts with spaces
 		// we don't want that spaces
-	for (int i = 0; i < str.size(); ++i)
-	{
-		if (isspace(str.at(i))){
-			str.erase(str.begin());		// remove front spaces
-			i--;
-		}
-		else
-			break;
-	}	
-
-  	vector<string> line = removeDupWord(str);
-
-  	if (line.at(0).compare("<node") == 0)	// Infos about a node
-  	{
-  		Node* nd = new Node();
-
-  		// We need to remove spaces from user's name
-  		// in order to separate the infos easier
-  		size_t u_pos = str.find("user=");
-    	size_t u_id = str.find("uid=");
-    	string uname = str.substr (u_pos, (u_id - u_pos)-1 );
-    	uname = space2underscore(uname);
-    	str.replace(u_pos, (u_id - u_pos)-1, uname);
-
-    	line = removeDupWord(str);	// Separate line by spaces
-
-    	// Extract node's id
-  		size_t pos = line.at(1).find("=");      	 // position of "=" in str
-			string id = line.at(1).substr (pos+1);       // get the id of node
-			id.erase(id.begin()); id.erase(id.end()-1);	 // remove " "
-
-  		(*nd).setID(id);	// Set node's id
-
-  		// Exrtact node's latitude
-  		pos = line.at(8).find("=");      	 	 		 // position of "=" in str
-			string lat = line.at(8).substr (pos+1);      	 // get the lat of node
-			lat.erase(lat.begin()); lat.erase(lat.end()-1);	 // remove " "
-  		double lat_d = stod (lat);
-
-  		(*nd).setLat(lat_d);	// Set node's latitude as bouble
-			
-  		// Exrtact node's longitude
-  		pos = line.at(9).find("=");      	 	 		 // position of "=" in str
-			string ln = line.at(9).substr (pos+1);      	 // get the lon of node
-			string lon;
-			for (int i = 0; i < ln.size(); ++i)
-			{
-				if (isdigit(ln.at(i)) || ln.at(i) == '.')
-					lon.push_back(ln.at(i));
+		for (int i = 0; i < str.size(); ++i)
+		{
+			if (isspace(str.at(i))){
+				str.erase(str.begin());		// remove front spaces
+				i--;
 			}
-			double lon_d = stod (lon);
+			else
+				break;
+		}	
 
-  		(*nd).setLon(lon_d);	// Set node's longtitude as bouble
+	  	vector<string> line = removeDupWord(str);
 
-  		nodes.push_back(nd);
-   	}
-   	else
-   	{
-   		if (line.at(0).compare("<way") == 0 || line.at(0).compare("<nd") == 0 || line.at(0).compare("<tag") == 0)
-   		   MyFile << str << "\n";
-   	}
+	  	if (line.at(0).compare("<node") == 0)	// Infos about a node
+	  	{
+	  		Node* nd = new Node();
 
-  // 	for (int i = 0; i < line.size(); ++i)
-  	// {
-  	// 	str = line.at(i);
-  	// 	cout << str << endl;
-  	// }
-  	// cout << endl;
+	  		// We need to remove spaces from user's name
+	  		// in order to separate the infos easier
+	  		size_t u_pos = str.find("user=");
+	    	size_t u_id = str.find("uid=");
+	    	string uname = str.substr (u_pos, (u_id - u_pos)-1 );
+	    	uname = space2underscore(uname);
+	    	str.replace(u_pos, (u_id - u_pos)-1, uname);
+
+	    	line = removeDupWord(str);	// Separate line by spaces
+
+	    	// Extract node's id
+	  		size_t pos = line.at(1).find("=");      	 // position of "=" in str
+				string id = line.at(1).substr (pos+1);       // get the id of node
+				id.erase(id.begin()); id.erase(id.end()-1);	 // remove " "
+
+	  		(*nd).setID(id);	// Set node's id
+
+	  		// Exrtact node's latitude
+	  		pos = line.at(8).find("=");      	 	 		 // position of "=" in str
+				string lat = line.at(8).substr (pos+1);      	 // get the lat of node
+				lat.erase(lat.begin()); lat.erase(lat.end()-1);	 // remove " "
+	  		double lat_d = stod (lat);
+
+	  		(*nd).setLat(lat_d);	// Set node's latitude as bouble
+				
+	  		// Exrtact node's longitude
+	  		pos = line.at(9).find("=");      	 	 		 // position of "=" in str
+				string ln = line.at(9).substr (pos+1);      	 // get the lon of node
+				string lon;
+				for (int i = 0; i < ln.size(); ++i)
+				{
+					if (isdigit(ln.at(i)) || ln.at(i) == '.')
+						lon.push_back(ln.at(i));
+				}
+				double lon_d = stod (lon);
+
+	  		(*nd).setLon(lon_d);	// Set node's longtitude as bouble
+
+	  		nodes.push_back(nd);
+	   	}
+	   	else
+	   	{
+	   		if (line.at(0).compare("<way") == 0 || line.at(0).compare("<nd") == 0 || line.at(0).compare("<tag") == 0 || line.at(0).compare("</way>") == 0)
+	   		   MyFile << str << "\n";
+	   	}
 	}
 
 	MyFile.close();
 	find_connections(connections_file);
-  
 
-  // Delete the File. We took all the usefull
-  // infos and we don't need it anymore
-  int n = connections_file.length();
-  char file_deletion[n + 1];
-  strcpy(file_deletion, connections_file.c_str());
-  remove(file_deletion);
+	// Delete the File. We took all the usefull
+    // infos and we don't need it anymore
+    int n = connections_file.length();
+    char file_deletion[n + 1];
+    strcpy(file_deletion, connections_file.c_str());
+    remove(file_deletion);
+}
+
+// Find all the edges on grpah of city for plot purpose
+void point_edges()
+{
+  vector<pair<Node*, Node*>> edges;
+  pair <Node*, Node*> edge;
+
+  for (int i = 0; i < nodes.size(); ++i)
+  {
+    Node* n = nodes.at(i);
+    for (int i = 0; i < (*n).getConnections()->size(); ++i)
+    {
+      Node* c = (*n).getConnections()->at(i); 
+      edge = make_pair(n, c);
+      edges.push_back(edge);
+    }
+  }
+
+  for (int i = edges.size()-1; i > 0; --i)
+  {
+    edge = edges.at(i);
+    string a, b, c, d;
+    a = (edge.first)->getID();
+    b = (edge.second)->getID();
+
+    for (int j = i-1; j > -1; --j)
+    {
+      edge = edges.at(j);
+      c = (edge.first)->getID();
+      d = (edge.second)->getID();
+
+      if ( a.compare(d) == 0 && b.compare(c) == 0 )
+        edges.erase(edges.begin() + i);
+    }
+  }
+
+  // Write infos of points and edges to a file
+  // so we can plot the map of the city
+  for (int i = 0; i < edges.size(); ++i)
+  {
+    edge = edges.at(i);
+
+    stringstream a_stream;
+    stringstream b_stream;
+    stringstream c_stream;
+    stringstream d_stream;
+
+    a_stream << fixed << setprecision(7) << (edge.first)->getLon();
+    b_stream << fixed << setprecision(7) << (edge.first)->getLat();
+    c_stream << fixed << setprecision(7) << (edge.second)->getLon();
+    d_stream << fixed << setprecision(7) << (edge.second)->getLat();
+
+    string str = a_stream.str() + " " + b_stream.str() + " " + c_stream.str() + " " + d_stream.str();
+
+    cout << str << endl;
+  }
 }
