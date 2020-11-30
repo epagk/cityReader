@@ -32,15 +32,15 @@ void Node::displayNode()
 
 int main()
 {
-	parse_data("cities/iraklio.osm");
-  // point_edges();
+	parse_data("cities/rethymno.osm");
+  	// point_edges();
 
-  for (int i = 0; i < nodes.size(); ++i)
-  {
-    Node* n = nodes.at(i);
-    cout << i << ") " << endl;
-    (*n).displayNode();
-  }
+  	for (int i = 0; i < nodes.size(); ++i)
+  	{
+    	Node* n = nodes.at(i);
+    	cout << i << ") " << endl;
+    	(*n).displayNode();
+  	}
 
 	return 0;
 }
