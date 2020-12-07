@@ -107,6 +107,81 @@ void remove_duplicates(vector<Node*> &v)
 	}
 }
 
+Node* getInitNode()
+{
+	srand ( time(NULL) );
+
+	int max = -1;
+	vector<Node*> candidates;
+
+	for (int i = 0; i < nodes.size(); ++i)
+	{
+		Node* n = nodes.at(i);
+		int h = (*n).getConnections()->size();
+
+		if (h < max)
+		  continue;
+
+		if (h > max){
+		  max = h;
+		  candidates.clear();
+		  candidates.push_back(n);
+		}
+		else
+		  candidates.push_back(n);
+	}
+
+	int r = rand() % candidates.size();
+	return candidates.at(r);
+}
+
+// Use BFS in order to get rid of disconnected nodes
+void BFS() 
+{ 
+	vector<Node*> inGraph;
+
+	// Mark all the vertices as not visited 
+    list<Node*> visited; 
+  
+    // Create a queue for BFS 
+    list<Node*> queue; 
+  
+  	// Pick randomly a node
+    // Mark the current node as visited and enqueue it 
+    Node* s = getInitNode();
+
+    visited.push_back(s);
+    queue.push_back(s); 
+    inGraph.push_back(s);
+  
+    while(!queue.empty()) 
+    { 
+        // Dequeue a vertex from queue and print it 
+        s = queue.front(); 
+        queue.pop_front(); 
+  
+        // Get all adjacent vertices of the dequeued 
+        // vertex s. If a adjacent has not been visited,  
+        // then mark it visited and enqueue it 
+        Node* n;
+		for (unsigned i = 0; i < (*s).getConnections()->size(); ++i)
+		{
+			n = (*s).getConnections()->at(i);
+			if (find(visited.begin(), visited.end(), n) != visited.end() == 0 )
+			{
+				visited.push_back(n);
+				queue.push_back(n);
+				inGraph.push_back(n);
+			}
+		} 
+    } 
+
+    nodes.clear();
+    auto it = next(inGraph.begin(), inGraph.size());
+	move(inGraph.begin(), it, back_inserter(nodes));
+	inGraph.erase(inGraph.begin(), it);
+}
+
 // create pairs of nodes which are connected
 void find_connections(string filename)
 {
@@ -121,7 +196,7 @@ void find_connections(string filename)
 	{
 		vector<string> line = removeDupWord(str);
 
-		if (line.at(0).compare("<way") == 0)
+		if (line.at(0).compare("<way") == 0)	// Keep record of nodes for a road
 		{
 			road.clear();
 			prevID = "0";
@@ -140,7 +215,7 @@ void find_connections(string filename)
 		    road.push_back(a);
 		}
 
-		if (line.at(0).compare("<tag") == 0)
+		if (line.at(0).compare("<tag") == 0)	// Don't keep record for unreachable roads
 		{
 			if (road.empty())
 				continue;
@@ -149,11 +224,26 @@ void find_connections(string filename)
 		    b = line.at(2).find("/");
 		    string tag = line.at(2).substr (a+1, (b - a)-1 );
 
-		    if ( tag.compare("\"ferry\"") == 0 )
-		    	road.clear();
+			if ( tag.compare("\"ferry\"") == 0  || tag.compare("\"footway\"") == 0 ||  tag.compare("\"pedestrian\"") == 0 || tag.compare("\"steps\"") == 0 
+				|| tag.compare("\"hotel\"") == 0 || tag.compare("\"path\"") == 0 || tag.compare("\"island\"") == 0 || tag.compare("\"breakwater\"") == 0 )
+			{
+				road.clear();
+			}
+
+		    string spec = line.at(1);
+
+			if ( spec.compare("k=\"leisure\"") == 0 || spec.compare("k=\"building\"") == 0 || spec.compare("k=\"natural\"") == 0 || spec.compare("k=\"landuse\"") == 0 
+				|| spec.compare("k=\"parking\"") == 0 || spec.compare("k=\"amenity\"") == 0 || spec.compare("k=\"website\"") == 0 || spec.compare("k=\"man_made\"") == 0
+				|| spec.compare("k=\"waterway\"") == 0 )
+			{
+				road.clear();
+			}
+
+
+		    
 		}
 
-		if (line.at(0).compare("</way>") == 0)
+		if (line.at(0).compare("</way>") == 0)	// Save an acceptable road
 		{
 			if ( road.empty() )
 				continue;
@@ -169,6 +259,7 @@ void find_connections(string filename)
 		}
 	}
 	remove_duplicates(nodes);
+	BFS();	// Delete disconnected nodes from main graph
 }
 
 // read the .osm file extracted from OpenStreetMap

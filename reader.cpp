@@ -21,26 +21,27 @@ void Node::displayNode()
     	cout << "No Connections!" << endl;
     else
     {
-    	for (int i = 0; i < connections.size(); ++i)
-	    {
-	    	Node* n = connections.at(i);
-	    	cout << n->getID() << " ";
-	    }
-	    cout << endl;
+    	// for (int i = 0; i < connections.size(); ++i)
+	    // {
+	    // 	Node* n = connections.at(i);
+	    // 	cout << n->getID() << " ";
+	    // }
+	    // cout << endl;
+      cout << "Num of neighbors: " << connections.size() << endl;
     }
 }
 
 int main()
 {
-	parse_data("cities/rethymno.osm");
-  	// point_edges();
+	parse_data("cities/agios.osm");
+  // point_edges();
 
-  	for (int i = 0; i < nodes.size(); ++i)
-  	{
-    	Node* n = nodes.at(i);
-    	cout << i << ") " << endl;
-    	(*n).displayNode();
-  	}
+	for (int i = 0; i < nodes.size(); ++i)
+	{
+  	Node* n = nodes.at(i);
+  	cout << i << ") " << endl;
+  	(*n).displayNode();
+	}
 
 	return 0;
 }
